@@ -1,36 +1,22 @@
-# Aviation Risk Simulator
+# ✈️ Airline Network Disruption Simulation Engine
 
-A simulation platform for modeling airline disruptions and passenger impact.
+## Overview
+This project simulates airline disruptions using Monte Carlo methods and network propagation models.
 
 ## Features
+- Monte Carlo delay simulation
+- Weibull-inspired stochastic modeling
+- Multi-airport network propagation
+- Economic impact estimation
+- Interactive Streamlit dashboard
 
-- Flight network modeling
-- Airline disruption simulation
-- Passenger impact estimation
-- Monte Carlo scenario simulation
-- FastAPI backend API
+## Architecture
+Streamlit → FastAPI → Simulation Engine
 
-## Tech Stack
+## Run
+pip install -r requirements.txt
+honcho start
 
-- Python
-- FastAPI
-- NumPy
-- Pandas
-
-## Run the Project
-
-Install dependencies:
-
-pip install fastapi uvicorn numpy pandas
-
-Run the server:
-
-uvicorn app.main:app --reload
-
-Open:
-
-http://127.0.0.1:8000/docs
-
-## Author
-
-Saleh Mahamat
+## Endpoints
+- /simulate/real
+- /simulate/network

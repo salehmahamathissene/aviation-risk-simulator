@@ -1,0 +1,6 @@
+flight_id,origin,destination,departure_time,duration,aircraft_id
+AF101,CDG,JFK,0,420,A1
+AF102,JFK,LAX,500,300,A1
+AF201,LHR,CDG,100,80,A2
+AF202,CDG,FRA,250,90,A2
+AF301,FRA,JFK,400,480,A3

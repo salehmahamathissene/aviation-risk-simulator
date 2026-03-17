@@ -1,0 +1,6 @@
+airport,avg_delay,cancel_prob
+CDG,45,0.04
+JFK,60,0.06
+DXB,30,0.02
+LHR,50,0.05
+FRA,40,0.03

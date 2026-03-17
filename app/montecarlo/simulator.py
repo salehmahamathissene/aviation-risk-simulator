@@ -1,41 +1,51 @@
-import random
+import numpy as np
+import pandas as pd
 
 
-class MonteCarloSimulator:
+class GlobalMonteCarlo:
 
-    def run(self, airports, runs=1000):
+    def __init__(self, runs=2000):
+        self.runs = runs
+        self.data = pd.read_csv("data/flights.csv")
 
-        total_costs = []
+    def simulate_once(self):
+        delays = []
+        cancellations = 0
 
-        for _ in range(runs):
+        for _, row in self.data.iterrows():
+            delay = np.random.normal(row["avg_delay"], 10)
+            cancel = np.random.rand() < row["cancel_prob"]
 
-            cost = self.simulate_network(airports)
+            delays.append(delay)
 
-            total_costs.append(cost)
+            if cancel:
+                cancellations += 1
+
+        return delays, cancellations
+
+    def run(self):
+        all_delays = []
+        total_cancellations = 0
+
+        for _ in range(self.runs):
+            delays, cancels = self.simulate_once()
+            all_delays.extend(delays)
+            total_cancellations += cancels
+
+        all_delays = np.array(all_delays)
+
+        mean_delay = float(np.mean(all_delays))
+        p95_delay = float(np.percentile(all_delays, 95))
+
+        economic_loss = self.compute_loss(mean_delay, total_cancellations)
 
         return {
-            "runs": runs,
-            "average_cost": int(sum(total_costs) / len(total_costs)),
-            "max_cost": int(max(total_costs)),
-            "min_cost": int(min(total_costs))
+            "mean_delay": mean_delay,
+            "p95_delay": p95_delay,
+            "cancelled_flights": int(total_cancellations),
+            "economic_loss_usd": economic_loss,
+            "runs": self.runs
         }
 
-
-    def simulate_network(self, airports):
-
-        total_cost = 0
-
-        for airport in airports:
-
-            # probability of disruption
-            if random.random() < 0.2:
-
-                delay_minutes = random.randint(30, 180)
-
-                passengers = random.randint(50, 300)
-
-                cost = delay_minutes * passengers * 10
-
-                total_cost += cost
-
-        return total_cost
+    def compute_loss(self, mean_delay, cancellations):
+        return mean_delay * 100 + cancellations * 50000

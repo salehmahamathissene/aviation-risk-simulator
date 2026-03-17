@@ -1,19 +1,17 @@
 import random
 
-DISRUPTION_TYPES = [
-    "weather_delay",
-    "technical_issue",
-    "crew_unavailable",
-    "airport_congestion"
-]
 
+class DisruptionEngine:
 
-def generate_disruption():
-    disruption = random.choice(DISRUPTION_TYPES)
+    def apply(self, flight):
 
-    delay = random.choice([15, 30, 60, 120])
+        r = random.random()
 
-    return {
-        "type": disruption,
-        "delay_minutes": delay
-    }
+        if r < 0.05:
+            flight.delay += random.randint(30, 180)
+
+        elif r < 0.08:
+            flight.delay += random.randint(60, 240)
+
+        elif r < 0.10:
+            flight.delay += random.randint(30, 120)

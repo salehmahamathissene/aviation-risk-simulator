@@ -1,25 +1,41 @@
 from fastapi import FastAPI
+from app.network.global_network import GlobalAirNetwork
+from app.montecarlo.simulator import GlobalMonteCarlo
 
-from app.montecarlo.simulator import MonteCarloSimulator
+app = FastAPI()
 
-app = FastAPI(title="Aviation Risk Simulator")
 
 @app.get("/")
 def root():
-    return {"message": "Aviation Risk Simulator API"}
+    return {
+        "system": "Airline Network Disruption Simulation Engine",
+        "version": "1.0.0",
+        "capabilities": [
+            "aircraft rotation modeling",
+            "delay propagation analysis",
+            "stochastic disruption simulation",
+            "monte carlo risk evaluation",
+            "network resilience analysis"
+        ],
+        "status": "operational"
+    }
 
-@app.get("/simulate")
+@app.get("/simulate/global")
 def simulate():
 
-    airports = [
-        "KGL","NBO","ADD","JNB","CAI","LOS","CMN","DSS","ACC","ABJ",
-        "CDG","LHR","FRA","AMS","MAD","BCN","FCO","IST","ZRH","VIE",
-        "DXB","DOH","AUH","DEL","BOM","SIN","HKG","BKK","ICN","NRT",
-        "JFK","LAX","ORD","ATL","DFW","MIA","SEA","DEN","SFO","YYZ"
-    ]
+    network = GlobalAirNetwork()
 
-    simulator = MonteCarloSimulator()
+    network.add_route("CDG", "JFK")
+    network.add_route("JFK", "LAX")
+    network.add_route("LAX", "HND")
 
-    result = simulator.run(airports, runs=1000)
+    sim = GlobalMonteCarlo()
+
+    result = sim.run(network, runs=2000)
 
     return result
+
+@app.get("/simulate/real")   # 🔥 THIS LINE IS THE KEY
+def simulate():
+    sim = GlobalMonteCarlo(runs=2000)
+    return sim.run()
