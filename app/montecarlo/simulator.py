@@ -1,22 +1,41 @@
-from app.disruptions.disruption_engine import generate_disruption
-from app.passenger.passenger_engine import passenger_impact
+import random
 
 
-def run_simulation(runs=1000):
+class MonteCarloSimulator:
 
-    total_cost = 0
+    def run(self, airports, runs=1000):
 
-    for i in range(runs):
+        total_costs = []
 
-        disruption = generate_disruption()
+        for _ in range(runs):
 
-        impact = passenger_impact(disruption["delay_minutes"])
+            cost = self.simulate_network(airports)
 
-        total_cost += impact["compensation_cost"]
+            total_costs.append(cost)
 
-    average_cost = total_cost / runs
+        return {
+            "runs": runs,
+            "average_cost": int(sum(total_costs) / len(total_costs)),
+            "max_cost": int(max(total_costs)),
+            "min_cost": int(min(total_costs))
+        }
 
-    return {
-        "runs": runs,
-        "average_cost": average_cost
-    }
+
+    def simulate_network(self, airports):
+
+        total_cost = 0
+
+        for airport in airports:
+
+            # probability of disruption
+            if random.random() < 0.2:
+
+                delay_minutes = random.randint(30, 180)
+
+                passengers = random.randint(50, 300)
+
+                cost = delay_minutes * passengers * 10
+
+                total_cost += cost
+
+        return total_cost
