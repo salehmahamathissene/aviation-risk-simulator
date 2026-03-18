@@ -22,3 +22,29 @@ class RecoveryEngine:
             recovery_plan[f] = self.reroute(f)
 
         return recovery_plan
+
+def suggest_recovery(delay, congestion):
+
+    score_cancel = delay * 0.7 + congestion * 100
+    score_swap = delay * 0.5
+    score_reroute = congestion * 120
+
+    scores = {
+        "Cancel & Rebook": score_cancel,
+        "Swap Aircraft": score_swap,
+        "Reroute Passengers": score_reroute,
+        "Hold": 10
+    }
+
+    return max(scores, key=scores.get)
+
+def suggest_recovery(delay, congestion):
+
+    scores = {
+        "Cancel Flights": delay * 0.8 + congestion * 50,
+        "Swap Aircraft": delay * 0.6,
+        "Reroute Passengers": congestion * 120,
+        "Hold": 20
+    }
+
+    return max(scores, key=scores.get)

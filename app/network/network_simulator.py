@@ -1,40 +1,43 @@
 import numpy as np
-import pandas as pd
+import random
+from app.network.global_network import build_network
+from app.propagation.cascade_engine import propagate_delay
+from app.analytics.economics import compute_costs
+from app.ai.recovery import suggest_recovery
 
+def run_network_simulation(runs=500):
 
-class NetworkSimulator:
+    G = build_network()
 
-    def __init__(self, runs=1000):
-        self.runs = runs
-        self.data = pd.read_csv("data/flights.csv")
+    all_total_delays = []
+    cancellations = 0
 
-    def simulate_network(self):
-        delays = []
+    nodes = list(G.nodes)
 
-        for i, row in self.data.iterrows():
+    for _ in range(runs):
+        start = random.choice(nodes)
+        initial_delay = random.uniform(30, 120)
 
-            base_delay = np.random.normal(row["avg_delay"], 10)
+        delays = propagate_delay(G, start, initial_delay)
 
-            if i > 0:
-                propagation = 0.5 * delays[i - 1]
-            else:
-                propagation = 0
+        total_delay = sum(delays.values())
+        all_total_delays.append(total_delay)
 
-            total_delay = base_delay + propagation
-            delays.append(total_delay)
+        if total_delay > 5000:
+            cancellations += 1
 
-        return delays
+    mean_delay = np.mean(all_total_delays)
+    p95 = np.percentile(all_total_delays, 95)
 
-    def run(self):
-        all_runs = []
+    economics = compute_costs(all_total_delays, cancellations)
 
-        for _ in range(self.runs):
-            all_runs.extend(self.simulate_network())
+    recommendation = suggest_recovery(mean_delay, random.random())
 
-        arr = np.array(all_runs)
-
-        return {
-            "mean_network_delay": float(np.mean(arr)),
-            "p95_network_delay": float(np.percentile(arr, 95)),
-            "max_delay": float(np.max(arr))
-        }
+    return {
+        "mean_delay": float(mean_delay),
+        "p95_delay": float(p95),
+        "cancelled_flights": cancellations,
+        "runs": runs,
+        "economics": economics,
+        "recommendation": recommendation
+    }

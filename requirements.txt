@@ -1,7 +1,6 @@
 fastapi
 uvicorn
-streamlit
 numpy
 pandas
-requests
-honcho
+networkx
+pyvis

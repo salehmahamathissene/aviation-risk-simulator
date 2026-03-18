@@ -1,25 +1,25 @@
-class CascadeEngine:
+import random
 
-    def propagate(self, network):
+def propagate_delay(G, start_node, initial_delay):
 
-        for flight in network.flights:
+    delays = {node: 0 for node in G.nodes}
+    delays[start_node] = initial_delay
 
-            if flight.delay > 120:
+    queue = [start_node]
 
-                downstream = network.get_downstream(flight)
+    while queue:
+        node = queue.pop(0)
 
-                for f in downstream:
+        for neighbor in G.successors(node):
 
-                    f.delay += 20
+            # propagation factor
+            factor = random.uniform(0.3, 0.7)
 
-def run_simulation(network):
+            propagated = delays[node] * factor
 
-    results = []
+            # only propagate if meaningful
+            if propagated > 5:
+                delays[neighbor] += propagated
+                queue.append(neighbor)
 
-    for i in range(100000):
-
-        scenario = network.simulate()
-
-        results.append(scenario)
-
-    return results
+    return delays

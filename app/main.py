@@ -1,5 +1,4 @@
 from fastapi import FastAPI
-from app.network.global_network import GlobalAirNetwork
 from app.montecarlo.simulator import GlobalMonteCarlo
 
 app = FastAPI()
@@ -20,22 +19,16 @@ def root():
         "status": "operational"
     }
 
+
+# 🔥 GLOBAL SIMULATION (clean, working)
 @app.get("/simulate/global")
-def simulate():
+def simulate_global():
+    sim = GlobalMonteCarlo(runs=2000)
+    return sim.run()
 
-    network = GlobalAirNetwork()
 
-    network.add_route("CDG", "JFK")
-    network.add_route("JFK", "LAX")
-    network.add_route("LAX", "HND")
-
-    sim = GlobalMonteCarlo()
-
-    result = sim.run(network, runs=2000)
-
-    return result
-
-@app.get("/simulate/real")   # 🔥 THIS LINE IS THE KEY
-def simulate():
+# 🔥 REAL SIMULATION (same engine for now)
+@app.get("/simulate/real")
+def simulate_real():
     sim = GlobalMonteCarlo(runs=2000)
     return sim.run()
