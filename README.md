@@ -1,25 +1,37 @@
-# ✈️ Aviation Risk Simulation Engine
+# ✈️ Airline Network Disruption Simulation Engine
 
-A next-level backend system that models airline disruptions using:
+A simulation-driven backend system for modeling airline disruptions, delay propagation, and economic risk.
 
-- Graph-based network modeling (NetworkX)
-- Monte Carlo simulation
-- Delay propagation algorithms
-- Economic impact estimation
+---
 
-## 🚀 Features
+## 🚀 Overview
 
-- Simulates global airline network disruptions
-- Models cascading delays across airports
-- Estimates cancellations and financial losses
-- Provides API endpoints for real-time analysis
+This project models how local disruptions (delays, congestion, weather) propagate across an airline network and impact operations and revenue.
 
-## 🧠 Tech Stack
+Instead of reacting to disruptions, the system simulates them *before they happen*.
 
-- Python (FastAPI)
-- NetworkX (graph modeling)
-- NumPy / Pandas (data simulation)
-- PyVis (network visualization)
+---
+
+## ⚙️ Core Capabilities
+
+- 🌐 Graph-based airline network modeling (NetworkX)
+- 📊 Monte Carlo simulation (thousands of runs)
+- ⏱️ Delay propagation across connected flights
+- ❌ Cancellation modeling under stress scenarios
+- 💸 Economic loss estimation (passenger impact + compensation)
+- ⚠️ Risk classification (LOW / MEDIUM / HIGH)
+
+---
+
+## 🧠 System Architecture
+
+- **FastAPI** → simulation engine (API layer)
+- **NetworkX** → flight network graph
+- **NumPy / Pandas** → stochastic modeling
+- **PyVis** → network visualization
+- **Event-based logic** → delay propagation
+
+---
 
 ## 📊 Example Output
 
