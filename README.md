@@ -1,6 +1,6 @@
 # ✈️ Airline Network Disruption Simulation Engine
 
-A Python-based simulation project exploring airline network disruptions, stochastic delay modeling, cancellation scenarios, and estimated operational costs.
+A Python-based experimental airline disruption simulation and engineering project exploring stochastic delay modeling, cancellation scenarios, airport network propagation, and estimated operational costs.
 
 ## 🚀 Overview
 
@@ -78,6 +78,21 @@ Example response:
 
 ## 🏗️ Architecture
 
+```mermaid
+flowchart LR
+    D["CSV datasets<br/>flights.csv<br/>flights_sample.csv<br/>global/airports.csv"]
+    M["Monte Carlo engine"]
+    N["Airport network and propagation engine"]
+    F["FastAPI"]
+    S["Streamlit dashboard"]
+
+    D --> M
+    D --> N
+    M --> F
+    N --> F
+    F --> S
+```
+
 The project is organized around several engineering components:
 
 - **API layer:** Exposes simulation functionality through FastAPI.
@@ -99,9 +114,6 @@ The active simulation endpoint returns metrics including:
 - `runs`
 
 Results are generated from the project's local CSV dataset and stochastic model. They are experimental estimates, not live operational forecasts.
-<img width="2145" height="1245" alt="aviation-risk-simulator-live-results" src="https://github.com/user-attachments/assets/c776f078-77cb-4ea0-932c-9afe92fad454" />
-
-
 
 ## ▶️ Getting Started
 
@@ -166,6 +178,22 @@ Open `http://127.0.0.1:8501`.
 
 The dashboard calls the API at `http://127.0.0.1:8000`.
 
+## 🧪 Testing
+
+Install the development dependencies:
+
+```bash
+python -m pip install -r requirements-dev.txt
+```
+
+Run the test suite:
+
+```bash
+python -m pytest -q
+```
+
+Current verified result: **28 tests passing**.
+
 ## ⚠️ Scope and Limitations
 
 This is an experimental engineering project.
@@ -197,6 +225,6 @@ Potential areas for further development include:
 
 Software Engineering Student | Backend & Full-Stack Developer | Aviation Technology
 
-GitHub: https://github.com/salehmahamathissene
+GitHub: [https://github.com/salehmahamathissene](https://github.com/salehmahamathissene)
 
 Project repository: https://github.com/salehmahamathissene/aviation-risk-simulator
