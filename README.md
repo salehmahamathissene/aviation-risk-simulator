@@ -54,6 +54,9 @@ The active simulation endpoint returns metrics including:
 - `runs`
 
 Results are generated from the project's local CSV dataset and stochastic model. They are experimental estimates, not live operational forecasts.
+<img width="2145" height="1245" alt="aviation-risk-simulator-live-results" src="https://github.com/user-attachments/assets/c776f078-77cb-4ea0-932c-9afe92fad454" />
+
+
 
 ## ▶️ Getting Started
 
