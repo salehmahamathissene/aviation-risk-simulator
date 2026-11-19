@@ -1,4 +1,5 @@
 import math
+from datetime import datetime
 from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, model_validator
@@ -24,7 +25,28 @@ STRICT_FLIGHT_FIELDS = {
     "passengers",
     "arrived",
     "cancelled",
+    "scheduled_departure_utc",
+    "scheduled_arrival_utc",
+    "departure_timezone",
+    "arrival_timezone",
+    "leg_type",
+    "cancellation_stage",
+    "cancellation_time_utc",
+    "cancellation_position_airport",
+    "cancellation_position_status",
+    "aircraft_assignment_authoritative",
+    "aircraft_id_source",
+    "aircraft_assignments",
 }
+
+
+class AircraftAssignment(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    aircraft_id: str
+    aircraft_type: Optional[str] = None
+    authoritative: bool = True
+    source: str = "schedule"
 
 
 def require_finite_number(value: float, field_name: str) -> float:
@@ -61,6 +83,16 @@ class Flight(BaseModel):
     cancelled: bool = False
     aircraft_assignment_authoritative: bool = True
     aircraft_id_source: str = "authoritative"
+    aircraft_assignments: list[AircraftAssignment] = []
+    scheduled_departure_utc: Optional[datetime] = None
+    scheduled_arrival_utc: Optional[datetime] = None
+    departure_timezone: Optional[str] = None
+    arrival_timezone: Optional[str] = None
+    leg_type: Literal["passenger", "cargo", "ferry", "positioning"] = "passenger"
+    cancellation_stage: Optional[Literal["before_departure", "after_departure", "unknown"]] = None
+    cancellation_time_utc: Optional[datetime] = None
+    cancellation_position_airport: Optional[str] = None
+    cancellation_position_status: Literal["at_airport", "in_flight", "unknown"] = "unknown"
 
     @model_validator(mode="before")
     @classmethod
@@ -133,6 +165,64 @@ class Flight(BaseModel):
 
     @model_validator(mode="after")
     def validate_schedule(self):
+        authoritative_assignment_ids = [
+            assignment.aircraft_id
+            for assignment in self.aircraft_assignments
+            if assignment.authoritative
+        ]
+        if len(set(authoritative_assignment_ids)) > 1:
+            raise ValueError(
+                "Multiple contradictory authoritative aircraft assignments"
+            )
+        if authoritative_assignment_ids:
+            if self.aircraft_id == "UNKNOWN":
+                self.aircraft_id = authoritative_assignment_ids[0]
+            elif self.aircraft_id not in authoritative_assignment_ids:
+                raise ValueError(
+                    "Flight aircraft_id conflicts with authoritative assignments"
+                )
+
+        if (
+            (self.scheduled_departure_utc is None)
+            != (self.scheduled_arrival_utc is None)
+        ):
+            raise ValueError(
+                "scheduled_departure_utc and scheduled_arrival_utc must be supplied together"
+            )
+        if self.scheduled_departure_utc is not None:
+            if self.scheduled_arrival_utc is not None:
+                if self.scheduled_arrival_utc < self.scheduled_departure_utc:
+                    raise ValueError(
+                        "scheduled_arrival_utc must not precede scheduled_departure_utc"
+                    )
+
+        if self.cancelled:
+            if self.cancellation_stage == "before_departure":
+                if (
+                    self.cancellation_position_status == "at_airport"
+                    and not self.cancellation_position_airport
+                ):
+                    raise ValueError(
+                        "Before-departure cancellation at an airport requires cancellation_position_airport"
+                    )
+            elif self.cancellation_stage == "after_departure":
+                if self.cancellation_time_utc is None:
+                    raise ValueError(
+                        "after-departure cancellation requires cancellation_time_utc"
+                    )
+                if (
+                    self.cancellation_position_status == "at_airport"
+                    and not self.cancellation_position_airport
+                ):
+                    raise ValueError(
+                        "After-departure airport position requires cancellation_position_airport"
+                    )
+            elif self.cancellation_stage == "unknown":
+                if self.cancellation_position_status == "at_airport":
+                    raise ValueError(
+                        "Unknown cancellation stage cannot establish an airport position"
+                    )
+
         numeric_fields = {
             "scheduled_departure": self.scheduled_departure,
             "minimum_turnaround_minutes": self.minimum_turnaround_minutes,
@@ -156,8 +246,6 @@ class Flight(BaseModel):
             raise ValueError("origin must not be empty")
         if not self.destination.strip():
             raise ValueError("destination must not be empty")
-        if not self.aircraft_id.strip():
-            raise ValueError("aircraft_id must not be empty")
         if self.origin == self.destination:
             raise ValueError("origin and destination must be different")
         if self.scheduled_departure < 0:
@@ -178,10 +266,6 @@ class Flight(BaseModel):
             if "minimum_turnaround_minutes" not in self.model_fields_set:
                 raise ValueError(
                     "strict mode requires an explicit minimum_turnaround_minutes"
-                )
-            if self.aircraft_id == "UNKNOWN":
-                raise ValueError(
-                    "strict mode requires a valid aircraft_id"
                 )
 
         if self.scheduled_arrival is None:
