@@ -1,5 +1,7 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
 from app.montecarlo.simulator import GlobalMonteCarlo
+from app.network.network_simulator import run_network_simulation
 
 app = FastAPI()
 
@@ -32,3 +34,23 @@ def simulate_global():
 def simulate_real():
     sim = GlobalMonteCarlo(runs=2000)
     return sim.run()
+
+
+class NetworkSimulationRequest(BaseModel):
+    runs: int = 500
+    start_airport: str | None = None
+    initial_delay: float | None = None
+    seed: int | None = None
+
+
+@app.post("/simulate/network")
+def simulate_network(request: NetworkSimulationRequest):
+    try:
+        return run_network_simulation(
+            runs=request.runs,
+            start_airport=request.start_airport,
+            initial_delay=request.initial_delay,
+            seed=request.seed,
+        )
+    except (ValueError, TypeError) as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc

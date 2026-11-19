@@ -18,7 +18,47 @@ The objective is to examine how simulated disruptions affect delay distributions
 - **Statistical analysis:** Mean delay and 95th-percentile delay calculations.
 - **Economic estimation:** Simplified cost estimation based on simulated delays and cancellations.
 - **FastAPI service:** HTTP endpoints for accessing simulation results.
-- **Network simulation modules:** Separate modules exploring graph-based airline networks and delay propagation.
+- **Network simulation:** A directed airport network with delay propagation across connected routes.
+
+## API Endpoints
+
+| Method | Endpoint | Purpose |
+|---|---|---|
+| `GET` | `/` | Service status |
+| `GET` | `/simulate/global` | Global Monte Carlo simulation |
+| `GET` | `/simulate/real` | Uses the same Monte Carlo implementation as the global simulation |
+| `POST` | `/simulate/network` | Directed network disruption simulation |
+
+### Network simulation request
+
+```bash
+curl -X POST http://127.0.0.1:8000/simulate/network \
+  -H "Content-Type: application/json" \
+  -d '{"runs":500,"start_airport":"CDG","initial_delay":60,"seed":123}'
+```
+
+Request body:
+
+```json
+{
+  "runs": 500,
+  "start_airport": "CDG",
+  "initial_delay": 60,
+  "seed": 123
+}
+```
+
+Example response:
+
+```json
+{
+  "mean_network_delay": 60.0,
+  "p95_network_delay": 60.0,
+  "max_delay": 60.0,
+  "affected_airports": ["CDG", "FRA", "JFK"],
+  "runs": 500
+}
+```
 
 ## 🧠 Technology Stack
 
@@ -30,6 +70,11 @@ The objective is to examine how simulated disruptions affect delay distributions
 | Pandas | Input data processing |
 | NetworkX | Airline network modeling modules |
 | Streamlit | Dashboard prototype |
+| Plotly | Optional visualization support |
+| Requests | Dashboard API requests |
+| PyVis | Interactive visualization support |
+| Matplotlib | Static visualization support |
+| SimPy | Event simulation support |
 
 ## 🏗️ Architecture
 
@@ -41,7 +86,7 @@ The project is organized around several engineering components:
 - **Disruption propagation:** Explores how delays can affect connected flights.
 - **Economic analysis:** Estimates simplified financial impacts.
 
-The current API exposes the global Monte Carlo implementation. Other network and dashboard components remain under development.
+The current API exposes the global Monte Carlo implementation, the `/simulate/real` alias, and the network POST endpoint.
 
 ## 📊 Simulation Output
 
@@ -109,13 +154,27 @@ curl http://127.0.0.1:8000/simulate/global
 
 The simulation currently defaults to 2,000 runs.
 
+### 6. Start the dashboard
+
+In a separate terminal:
+
+```bash
+streamlit run dashboard.py
+```
+
+Open `http://127.0.0.1:8501`.
+
+The dashboard calls the API at `http://127.0.0.1:8000`.
+
 ## ⚠️ Scope and Limitations
 
 This is an experimental engineering project.
 
 - The current input dataset is illustrative and limited in size.
+- `data/flights_sample.csv` contains an illustrative `JFK -> LAX` route. `LAX` is not present in `data/global/airports.csv`, so that route is excluded by strict airport validation.
 - The `/simulate/real` endpoint currently uses the same simulation implementation as `/simulate/global`; it does not retrieve live airline data.
-- Network simulation modules are separate from the currently exposed API endpoints.
+- The network model uses a small directed route graph and stochastic propagation factors.
+- The network model does not include airport capacity, aircraft availability, passenger flows, weather, scheduling constraints, or a calibrated aviation cost model.
 - Economic estimates use simplified assumptions rather than validated airline cost models.
 - The project has not been established as a certified or operational airline decision-support system.
 

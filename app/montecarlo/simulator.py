@@ -4,16 +4,52 @@ import pandas as pd
 
 class GlobalMonteCarlo:
 
-    def __init__(self, runs=2000):
+    def __init__(self, runs=2000, seed=None, data_path="data/flights.csv"):
+        if isinstance(runs, bool) or not isinstance(runs, int):
+            raise ValueError("runs must be a positive integer")
+        if runs <= 0:
+            raise ValueError("runs must be a positive integer")
+
         self.runs = runs
-        self.data = pd.read_csv("data/flights.csv")
+        self.seed = seed
+        self.data = pd.read_csv(data_path)
+        self._validate_data()
+
+        if seed is not None:
+            np.random.seed(seed)
+
+    def _validate_data(self):
+        required_columns = {"avg_delay", "cancel_prob"}
+        missing_columns = required_columns.difference(self.data.columns)
+        if missing_columns:
+            raise ValueError(
+                "Missing required columns: "
+                + ", ".join(sorted(missing_columns))
+            )
+        if self.data.empty:
+            raise ValueError("Simulation dataset is empty")
+
+        for column in ("avg_delay", "cancel_prob"):
+            if self.data[column].isna().any():
+                raise ValueError(f"{column} contains missing values")
+
+        try:
+            avg_delays = pd.to_numeric(self.data["avg_delay"], errors="raise")
+            cancel_probs = pd.to_numeric(self.data["cancel_prob"], errors="raise")
+        except (TypeError, ValueError) as exc:
+            raise ValueError("Simulation dataset contains invalid numeric values") from exc
+
+        if avg_delays.lt(0).any():
+            raise ValueError("avg_delay values must be non-negative")
+        if cancel_probs.lt(0).any() or cancel_probs.gt(1).any():
+            raise ValueError("cancel_prob values must be between 0 and 1")
 
     def simulate_once(self):
         delays = []
         cancellations = 0
 
         for _, row in self.data.iterrows():
-            delay = np.random.normal(row["avg_delay"], 10)
+            delay = max(0.0, float(np.random.normal(row["avg_delay"], 10)))
             cancel = np.random.rand() < row["cancel_prob"]
 
             delays.append(delay)
