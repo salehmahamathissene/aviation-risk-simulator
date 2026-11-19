@@ -1,6 +1,10 @@
 import random
 import networkx as nx
 from app.models.flight import Flight
+from app.models.flight import (
+    LEGACY_DURATION_MINUTES,
+    LEGACY_TURNAROUND_MINUTES,
+)
 
 
 class AirlineNetwork:
@@ -14,7 +18,7 @@ class AirlineNetwork:
             graph.add_node(airport)
 
         # create many flights
-        for _ in range(500):
+        for i in range(500):
 
             origin = random.choice(airports)
             destination = random.choice(airports)
@@ -25,9 +29,17 @@ class AirlineNetwork:
             delay = random.randint(0, 60)
 
             flight = Flight(
+                flight_id=f"AL{i}",
                 origin=origin,
                 destination=destination,
-                delay_minutes=delay
+                scheduled_departure=float(i),
+                duration=LEGACY_DURATION_MINUTES,
+                aircraft_id=f"LEGACY-A{i % 5}",
+                minimum_turnaround_minutes=LEGACY_TURNAROUND_MINUTES,
+                delay_minutes=delay,
+                schedule_mode="legacy",
+                aircraft_assignment_authoritative=False,
+                aircraft_id_source="synthetic_demo",
             )
 
             flights.append(flight)

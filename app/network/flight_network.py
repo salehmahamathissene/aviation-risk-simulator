@@ -1,5 +1,9 @@
 import random
 from app.models.flight import Flight
+from app.models.flight import (
+    LEGACY_DURATION_MINUTES,
+    LEGACY_TURNAROUND_MINUTES,
+)
 
 class FlightNetwork:
 
@@ -18,7 +22,13 @@ class FlightNetwork:
                     flight_id=f"FL{i}",
                     origin=origin,
                     destination=destination,
-                    departure_time=random.randint(0, 1440)
+                    scheduled_departure=random.randint(0, 1440),
+                    duration=LEGACY_DURATION_MINUTES,
+                    aircraft_id=f"LEGACY-A{i % 5}",
+                    minimum_turnaround_minutes=LEGACY_TURNAROUND_MINUTES,
+                    schedule_mode="legacy",
+                    aircraft_assignment_authoritative=False,
+                    aircraft_id_source="synthetic_demo",
                 )
 
                 flights.append(flight)

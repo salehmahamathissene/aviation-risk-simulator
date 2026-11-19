@@ -1,14 +1,6 @@
 from pydantic import BaseModel
 from typing import List
-
-
-class Flight(BaseModel):
-    flight_id: str
-    origin: str
-    destination: str
-    departure_time: int
-    duration: int
-    aircraft_id: str
+from app.models.flight import Flight
 
 
 class SimulationRequest(BaseModel):

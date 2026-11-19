@@ -6,7 +6,7 @@ class RiskEngine:
 
         for flight in flights:
 
-            cost = flight.delay * flight.passengers * 5
+            cost = flight.delay_minutes * flight.passengers * 5
 
             total_cost += cost
 
