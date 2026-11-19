@@ -6,14 +6,18 @@ class FlightDepartureEvent:
 
     def process(self, engine):
 
-        if self.flight.delay > 0:
-            engine.schedule(engine.time + self.flight.delay, self)
+        if self.flight.cancelled:
+            self.flight.arrived = False
+            return
 
-        else:
-            engine.schedule(
-                engine.time + self.flight.duration,
-                FlightArrivalEvent(self.flight)
-            )
+        actual_departure = max(
+            float(self.flight.scheduled_departure),
+            float(engine.time),
+        ) + float(self.flight.delay_minutes)
+        engine.schedule(
+            actual_departure + float(self.flight.duration),
+            FlightArrivalEvent(self.flight),
+        )
 
 
 class FlightArrivalEvent:

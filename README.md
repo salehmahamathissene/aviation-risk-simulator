@@ -192,7 +192,7 @@ Run the test suite:
 python -m pytest -q
 ```
 
-Current verified result: **28 tests passing**.
+Current verified result: **108 tests passing**.
 
 ## ⚠️ Scope and Limitations
 

@@ -14,10 +14,13 @@ class AirlineSimulation:
 
     def flight_process(self, flight):
 
-        yield self.env.timeout(flight.departure_time)
+        if flight.cancelled:
+            return
 
-        if flight.delay > 0:
-            yield self.env.timeout(flight.delay)
+        yield self.env.timeout(flight.scheduled_departure)
+
+        if flight.delay_minutes > 0:
+            yield self.env.timeout(flight.delay_minutes)
 
         yield self.env.timeout(flight.duration)
 
